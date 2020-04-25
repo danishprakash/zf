@@ -1,0 +1,94 @@
+#! /usr/bin/env bash
+
+# zf - barely there fetch utility
+# =========================================================
+# - https://github.com/danishprakash/zf
+# - https://danishpraka.sh
+
+declare -- terminal
+declare -- uptime
+declare -- os
+declare -- user
+
+declare editor=$(basename $EDITOR)
+declare kernel=$(uname -r)
+declare shell=$(basename $SHELL)
+
+# there's no sure shot way to determine
+# the terminal emulator that's set so...
+get_terminal() {
+    for term in {"alacritty","iterm","kitty","terminal"}; do
+        if pgrep -lif ${term} &>/dev/null; then
+            echo ${term}
+            break
+        fi
+    done
+}
+
+get_user() {
+    echo "$(whoami)@$(hostname)"
+}
+
+# parse the uptime part from the uptime command
+get_uptime() {
+    echo "$(uptime | awk -F',' '{print $1}' | cut -d" " -f3-)"
+}
+
+get_os_info() {
+    case "$OSTYPE" in
+        "linux-gnu")
+            echo "linux"
+            ;;
+
+        "darwin"*)
+            echo "macOS"
+            ;;
+
+        "freebsd"*)
+            echo "FreeBSD"
+            ;;
+
+        "*")
+            echo ""
+            ;;
+    esac
+}
+
+print_info() {
+    if [ ! -z "${user}" ]; then echo -e "${user}"; fi
+
+    echo -e "OS:\t\t $(get_os_info)"
+    echo -e "KERNEL:\t\t ${kernel}"
+    echo -e "SHELL:\t\t ${shell}"
+    echo -e "EDITOR:\t\t ${editor}"
+
+    # print the following attributes based on flags
+    if [ ! -z "${terminal}" ]; then echo -e "TERMINAL:\t ${terminal}"; fi
+    if [ ! -z "${uptime}" ]; then echo -e "UPTIME:\t\t ${uptime}"; fi
+}
+
+# how low can you go?
+clear_screen() {
+    clear
+}
+
+for arg in "$@"; do
+    case $arg in
+        --terminal)
+            terminal=$(get_terminal)
+            shift
+            ;;
+
+        --uptime)
+            uptime=$(get_uptime)
+            shift
+            ;;
+
+        --user)
+            user=$(get_user)
+            shift
+            ;;
+    esac
+done
+
+print_info
