@@ -8,11 +8,16 @@
 declare -- terminal
 declare -- uptime
 declare -- os
+declare -- distro
 declare -- user
 
 declare editor=$(basename $EDITOR)
 declare kernel=$(uname -r)
 declare shell=$(basename $SHELL)
+
+get_distro() {
+    grep "^NAME" /etc/os-release | sed 's/^NAME="\(.*\)".*/\1/'
+}
 
 # there's no sure shot way to determine
 # the terminal emulator that's set so...
@@ -37,7 +42,7 @@ get_uptime() {
 get_os_info() {
     case "$OSTYPE" in
         "linux-gnu")
-            echo "linux"
+            echo "GNU/Linux"
             ;;
 
         "darwin"*)
@@ -58,6 +63,7 @@ print_info() {
     if [ ! -z "${user}" ]; then echo -e "${user}"; fi
 
     echo -e "OS:\t\t $(get_os_info)"
+    echo -e "DISTRO:\t\t $(get_distro)"
     echo -e "KERNEL:\t\t ${kernel}"
     echo -e "SHELL:\t\t ${shell}"
     echo -e "EDITOR:\t\t ${editor}"
